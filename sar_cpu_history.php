@@ -1,27 +1,24 @@
 <?php
-//
-// SAR CPU info parser
-// The output is an array filled with CPU usage data (and some empty keys):
-// out[0] Time (timestamp for the record)
-// out[1] 
-// out[2] 
-// out[3] CPU  (read sar docs)
-// out[4] 
-// out[5] %user (read sar docs)
-// out[6] 
-// out[7] %nice (read sar docs)
-// out[8] 
-// out[9] %system (read sar docs)
-// out[10] 
-// out[11] %iowait (read sar docs)
-// out[12] 
-// out[13] %steal (read sar docs)
-// out[14] 
-// out[15] %idle (read sar docs)
+//-------------------
+// SAR info parser
+// The output is an array filled with usage data (and some empty keys):
+//-------------------
 
-function sar_cpu_history() {
+function get_sar_info($atr = 'cpu') {
 
-	$data = shell_exec('LC_TIME=en_UK.utf8 sar'); //execute 'sar' utility with UK locale parameter so the time format is 24H
+	switch ($atr) {
+		case 'cpu':
+			$atr = '-u';
+			break;
+		case 'memory':
+			$atr = '-r';
+			break;
+		case 'network':
+			$atr = '-n DEV';
+			break;
+	}
+
+	$data = shell_exec('LC_TIME=en_UK.utf8 sar ' . $atr); //execute 'sar' utility with UK locale parameter so the time format is 24H
 	$data = explode("\n", $data); // divide output by lines and refill the array
 	$data = array_slice($data, 3, -2); // offset the array so we skip header and footer	
 
@@ -30,7 +27,7 @@ function sar_cpu_history() {
 	// Loop throw array and remove all spaces possible. Only data is allowed
 	foreach ($data as $key => $item)
 	{
-		$data[$key] = preg_split( "/ ( |  |   |    |     |      |) /", $item );
+		$data[$key] = preg_split( "/ ( |  |   |    |     |      |       |) /", $item );
 	}
 	
 	// Loop throw array and filter non-data values. First level
@@ -46,16 +43,25 @@ function sar_cpu_history() {
 				$row_array[$key] = '0';
 			}
 			// Some nasty exceptions
-			if ($row_array[0] == '0') $row_array[0] = '00:00:00'; // data value cannot be 0 so we set it in time format. Need to rework
-			if (!isset($row_array[15])) $row_array[15] = '0'; // key 15 is for CPU idle - set to 0 if it's null 
+			if (!$row_array[$key]) $row_array[$key] = '0'; // Nulify empty keys 
+			if ($row_array[0] == '0') $row_array[0] = '00:00:00'; // time value cannot be 0 so we set it in time format. Need to rework
 
 		}
+
+		// Remove empty elements
+		$row_array = array_filter($row_array, function($value) { return $value !== ''; });
 
 		// We add array data to a new array only if keys count is above 5 to filter data only (skip 'LINUX RESTART' short row, blank rows etc.)
 		if (count($row_array) > 5 ) {
-			$out[$key_row] = $row_array;
+			// Nasty exception for network
+			if ($atr != '-n DEV') {
+				$out[$key_row] = $row_array;
+			} else {
+				if (count($row_array) == 18 && $row_array['3'] == "eth0") {
+					$out[$key_row] = $row_array;
+				}
+			}
 		}
-
 	}
 
 	// Debug
