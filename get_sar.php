@@ -59,7 +59,7 @@ function get_sar_info($atr = 'cpu') {
 			if ($atr != '-n DEV') {
 				$out[$key_row] = $row_array;
 			} else {
-				if (count($row_array) == 18 && $row_array['3'] == "eth0") {
+				if ($row_array['1'] == "eth0") {
 					$out[$key_row] = $row_array;
 				}
 			}
