@@ -18,7 +18,7 @@ function get_sar_info($atr = 'network') {
 			break;
 	}
 
-	$data = shell_exec('LC_TIME=en_UK.utf8 sar ' . $atr);	//execute 'sar' utility with UK locale parameter so the time format is 24H
+	$data = shell_exec('LC_TIME=en_UK.utf8 sar ' . $atr);	// execute 'sar' utility with UK locale parameter so the time format is 24H
 	$data = explode("\n", $data);				// divide output by lines and refill the array
 	$data = array_slice($data, 1); 				// slice the array so we skip header which occurs every 24 hours	
 
