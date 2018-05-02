@@ -19,10 +19,10 @@ function get_sar_info($atr = 'network') {
 	}
 
 	$data = shell_exec('LC_TIME=en_UK.utf8 sar ' . $atr);	//execute 'sar' utility with UK locale parameter so the time format is 24H
-	$data = explode("\n", $data);							// divide output by lines and refill the array
-	$data = array_slice($data, 1); 							// slice the array so we skip header which occurs every 24 hours	
+	$data = explode("\n", $data);				// divide output by lines and refill the array
+	$data = array_slice($data, 1); 				// slice the array so we skip header which occurs every 24 hours	
 
-	$out = array(); 										// declare the output array
+	$out = array(); 					// declare the output array
 
 	// Loop throw data array and remove all spaces between columns
 	foreach ($data as $key => $item)
