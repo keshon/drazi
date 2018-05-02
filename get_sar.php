@@ -27,7 +27,9 @@ function get_sar_info($atr = 'cpu') {
 	// Loop throw array and remove all spaces possible. Only data is allowed
 	foreach ($data as $key => $item)
 	{
-		$data[$key] = preg_split( "/ ( |  |   |    |     |      |       |) /", $item );
+		$data[$key] = preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ', $data[$key]);
+		$data[$key] = rtrim($data[$key]);
+		$data[$key] = explode(" ", $data[$key]);
 	}
 	
 	// Loop throw array and filter non-data values. First level
